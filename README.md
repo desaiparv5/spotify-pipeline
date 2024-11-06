@@ -23,15 +23,33 @@ This project automates the daily extraction of "Top Songs Global" information fr
 
 ## Setup
 
-1. Clone this repository
-2. Set up AWS CLI and configure your credentials
-3. Create an S3 bucket for temporary data storage
-4. Create a Snowflake database and table for storing the extracted data
-5. Set up a Spotify Developer account and obtain API credentials
-6. Configure the Lambda function with necessary environment variables:
+1. Create an EventBridge rule to trigger the "extract" Lambda function daily at 10:00 AM.
+
+2. In your S3 bucket, create two folders:
+   - "to_processed"
+   - "transformed_data"
+
+3. Set up a trigger on the "to_processed" folder in S3 to invoke the "transform" Lambda function when new objects are created.
+
+4. In Snowflake, create a new database and schema for this project.
+
+5. Execute the SQL commands in the `snowflake/sql_worksheet.sql` file one by one in the newly created schema.
+
+6. In the S3 "processed" folder, create three subfolders:
+   - "album_data/"
+   - "songs_data/"
+   - "artist_data/"
+
+7. Create an event trigger in S3 with a notification destination as an SQS queue. The ARN for this queue can be found in the "notification_channel" column of the output from running the "SHOW PIPES;" command (line 74 in the sql_worksheet.sql file).
+
+8. Configure the Lambda functions with necessary environment variables:
    - Spotify API credentials
-   - S3 bucket name
+   - S3 bucket name and folder paths
    - Snowflake connection details
+
+9. Ensure that the Lambda functions have the necessary IAM permissions to access S3, EventBridge, and Snowflake.
+
+10. Test the pipeline by manually triggering the "extract" Lambda function and verifying that data flows through the entire process.
 
 ## Usage
 
